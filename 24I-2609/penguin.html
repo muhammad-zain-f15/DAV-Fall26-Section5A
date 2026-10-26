@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palmer Penguins Analysis - Task 1</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- D3.js v7 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    .grid-bg {
+      background-size: 30px 30px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    .bar-glow-mass {
+      filter: drop-shadow(0px 0px 8px rgba(245, 158, 11, 0.6));
+    }
+    .bar-glow-flipper {
+      filter: drop-shadow(0px 0px 8px rgba(59, 130, 246, 0.8));
+    }
+    .tooltip {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out, transform 0.1s ease-out;
+      z-index: 50;
+    }
+    .axis text {
+      fill: #94a3b8;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .axis path, .axis line {
+      stroke: #334155;
+    }
+    .grid-line line {
+      stroke: rgba(255, 255, 255, 0.05);
+      stroke-dasharray: 4,4;
+    }
+  </style>
+</head>
+<body class="min-h-screen grid-bg pb-12">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
+          <i class="fa-solid fa-feather-pointed text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-300 bg-clip-text text-transparent">
+            Palmer Penguins Data Insights
+          </h1>
+          <p class="text-xs text-slate-400">Species Comparison Task #1 Analysis</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Dataset: 333 Sample Records</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
+
+    <!-- Direct Answer Banner -->
+    <div class="glass-card rounded-2xl p-6 border-l-4 border-l-blue-500 relative overflow-hidden">
+      <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider text-blue-400">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Key Finding & Solution</span>
+          </div>
+          <h2 class="text-lg md:text-xl font-bold text-white">
+            Which penguin species is the heaviest, and does it also have the longest flippers?
+          </h2>
+          <p class="text-slate-300 text-sm leading-relaxed max-w-3xl">
+            <strong class="text-amber-400 font-semibold">Gentoo</strong> is the heaviest species with an average body mass of <strong class="text-amber-300">5,076.0 g</strong>. 
+            <span class="text-emerald-400 font-semibold">YES!</span> Gentoo also possesses the longest average flipper length at <strong class="text-blue-400">217.2 mm</strong> (highlighted in <span class="text-blue-400 font-bold">Vibrant Blue</span>).
+          </p>
+        </div>
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 flex items-center space-x-4 shrink-0">
+          <div class="text-center px-2">
+            <span class="text-xs text-slate-400 block uppercase font-medium">Heaviest</span>
+            <span class="text-amber-400 font-extrabold text-base">Gentoo</span>
+          </div>
+          <div class="h-8 w-[1px] bg-slate-700"></div>
+          <div class="text-center px-2">
+            <span class="text-xs text-slate-400 block uppercase font-medium">Longest Flipper</span>
+            <span class="text-blue-400 font-extrabold text-base">Gentoo (YES)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="species-cards">
+      <!-- Injected dynamically -->
+    </div>
+
+    <!-- Chart 1: Species Clustered Bar Chart -->
+    <div class="glass-card rounded-2xl p-5 md:p-7 relative">
+      <!-- Chart Control Bar & Title with Findings -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-800 pb-5">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400">Chart 1 Insights</span>
+          <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2 mt-0.5">
+            <i class="fa-solid fa-chart-column text-blue-400"></i>
+            Species Morphological Metrics: Gentoo Leads in Mass & Flipper Dimensions
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">
+            <strong>Finding:</strong> Gentoo penguins significantly surpass Adelie and Chinstrap in both mean body mass (+36%) and flipper length (+11%).
+          </p>
+        </div>
+
+        <!-- Custom Interactive Legend -->
+        <div class="flex flex-wrap items-center gap-4 text-xs font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 shrink-0">
+          <div class="flex items-center space-x-2">
+            <span class="w-3.5 h-3.5 rounded bg-amber-500 inline-block shadow-sm"></span>
+            <span class="text-slate-200">Heaviest Mass (Gentoo)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-3.5 h-3.5 rounded bg-slate-600 inline-block"></span>
+            <span class="text-slate-400">Other Mass</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-3.5 h-3.5 rounded bg-blue-500 inline-block shadow-sm"></span>
+            <span class="text-slate-200">Longest Flipper (Gentoo)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-3.5 h-3.5 rounded bg-slate-700 inline-block"></span>
+            <span class="text-slate-400">Other Flipper</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main SVG Canvas Area -->
+      <div class="w-full relative overflow-x-auto min-h-[380px]" id="chart-container">
+        <!-- Tooltip Element -->
+        <div id="tooltip" class="tooltip glass-card p-3 rounded-xl border border-slate-700 text-xs shadow-2xl space-y-1"></div>
+      </div>
+
+      <!-- Chart Footnote -->
+      <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+        <div class="flex items-center space-x-1.5">
+          <i class="fa-solid fa-circle-info text-slate-400"></i>
+          <span>Left Y-Axis represents <strong>Body Mass (g)</strong> | Right Y-Axis represents <strong>Flipper Length (mm)</strong>.</span>
+        </div>
+        <span>Hover over individual bars for expanded statistical details.</span>
+      </div>
+    </div>
+
+    <!-- Chart 2: Island Distribution Bar Chart -->
+    <!-- <div class="glass-card rounded-2xl p-5 md:p-7 relative"> -->
+      <!-- Chart Control Bar & Title with Findings -->
+      <!-- <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-800 pb-5">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Chart 2 Insights</span>
+          <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2 mt-0.5">
+            <i class="fa-solid fa-location-dot text-emerald-400"></i>
+            Geographic Population Distribution: Biscoe Island Hosts Maximum Penguins
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">
+            <strong>Finding:</strong> Biscoe Island has the largest population with <strong>163 penguins (~48.9%)</strong>, followed by Dream (123) and Torgersen (47).
+          </p>
+        </div> -->
+
+        <!-- Custom Interactive Legend -->
+        <!-- <div class="flex flex-wrap items-center gap-4 text-xs font-medium bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 shrink-0">
+          <div class="flex items-center space-x-2">
+            <span class="w-3.5 h-3.5 rounded bg-emerald-500 inline-block shadow-sm"></span>
+            <span class="text-slate-200">Max Population (Biscoe)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="w-3.5 h-3.5 rounded bg-slate-700 inline-block"></span>
+            <span class="text-slate-400">Other Islands</span>
+          </div>
+        </div>
+      </div> -->
+
+      <!-- Main SVG Canvas Area for Island Chart -->
+      <!-- <div class="w-full relative overflow-x-auto min-h-[350px]" id="island-chart-container"> -->
+        <!-- Tooltip Element -->
+        <!-- <div id="island-tooltip" class="tooltip glass-card p-3 rounded-xl border border-slate-700 text-xs shadow-2xl space-y-1"></div>
+      </div> -->
+
+      <!-- Chart Footnote -->
+      <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+        <div class="flex items-center space-x-1.5">
+          <i class="fa-solid fa-circle-info text-slate-400"></i>
+          <span>Total observed sample count across all 3 islands is <strong>333 penguins</strong>.</span>
+        </div>
+        <span>Highlighted bar indicates island with highest penguin density.</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- D3 Application Logic Script -->
+  <script>
+    // URL fallback to official Palmer Penguins dataset on GitHub if local penguins.csv isn't found
+    const REMOTE_CSV_URL = "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv";
+
+    // Application state computed dynamically from CSV
+    let penguinData = [];
+    let islandData = [];
+    let heaviestSpecies = null;
+    let longestFlipperSpecies = null;
+    let matchesCondition = false;
+    let maxIsland = null;
+
+    // Load and Process CSV dynamically using D3.js
+    async function loadDataAndRender() {
+      try {
+        let rawData;
+        try {
+          // Attempt loading local penguins.csv first as requested
+          rawData = await d3.csv("penguins.csv", d3.autoType);
+        } catch (localError) {
+          console.warn("Local penguins.csv not found, falling back to remote hosted penguins.csv", localError);
+          rawData = await d3.csv(REMOTE_CSV_URL, d3.autoType);
+        }
+
+        // Clean & filter out records with missing numerical data (NA / null)
+        const cleanData = rawData.filter(d => 
+          d.species && 
+          d.island && 
+          d.body_mass_g != null && !isNaN(d.body_mass_g) &&
+          d.flipper_length_mm != null && !isNaN(d.flipper_length_mm)
+        );
+
+        // 1. D3 Group & Rollup for Species Stats (Mean Mass, Mean Flipper Length, Count)
+        const speciesMap = d3.group(cleanData, d => d.species);
+        penguinData = Array.from(speciesMap, ([species, rows]) => ({
+          species: species,
+          count: rows.length,
+          meanMass: d3.mean(rows, d => d.body_mass_g),
+          meanFlipper: d3.mean(rows, d => d.flipper_length_mm)
+        }));
+
+        // Dynamically identify max species metrics using d3.greatest
+        heaviestSpecies = d3.greatest(penguinData, d => d.meanMass);
+        longestFlipperSpecies = d3.greatest(penguinData, d => d.meanFlipper);
+        matchesCondition = heaviestSpecies.species === longestFlipperSpecies.species;
+
+        // 2. D3 Rollup for Island Counts & Percentages
+        const totalClean = cleanData.length;
+        const islandMap = d3.rollup(cleanData, v => v.length, d => d.island);
+        islandData = Array.from(islandMap, ([island, count]) => ({
+          island: island,
+          count: count,
+          percentage: `${((count / totalClean) * 100).toFixed(1)}%`
+        }));
+
+        maxIsland = d3.greatest(islandData, d => d.count);
+
+        // Render UI and SVG charts after runtime calculations finish
+        renderCards();
+        renderChart();
+        renderIslandChart();
+
+      } catch (err) {
+        console.error("Failed to load or process penguin dataset:", err);
+      }
+    }
+
+    // Render Summary Cards
+    function renderCards() {
+      const cardContainer = d3.select("#species-cards");
+      cardContainer.html("");
+
+      penguinData.forEach(d => {
+        const isHeaviest = d.species === heaviestSpecies.species;
+        const isLongest = d.species === longestFlipperSpecies.species;
+
+        const card = cardContainer.append("div")
+          .attr("class", `glass-card rounded-2xl p-5 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 ${
+            isHeaviest ? 'border-2 border-amber-500/50 bg-slate-800/90' : ''
+          }`);
+
+        card.html(`
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <h4 class="text-lg font-bold text-slate-100">${d.species}</h4>
+              <span class="text-xs text-slate-400">${d.count} Samples</span>
+            </div>
+            ${isHeaviest ? `
+              <span class="bg-amber-500/20 text-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-full border border-amber-500/30 uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-crown"></i> Heaviest
+              </span>
+            ` : ''}
+          </div>
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[11px] text-slate-400 block mb-0.5">Mean Weight</span>
+              <span class="text-base font-extrabold ${isHeaviest ? 'text-amber-400' : 'text-slate-200'}">
+                ${d.meanMass.toLocaleString('en-US', {minimumFractionDigits: 1})} <span class="text-xs font-normal">g</span>
+              </span>
+            </div>
+            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[11px] text-slate-400 block mb-0.5">Mean Flipper</span>
+              <span class="text-base font-extrabold ${isLongest && isHeaviest ? 'text-blue-400' : 'text-slate-200'}">
+                ${d.meanFlipper.toFixed(1)} <span class="text-xs font-normal">mm</span>
+              </span>
+            </div>
+          </div>
+        `);
+      });
+    }
+
+    // Render Clustered Bar Chart for Task 1
+    function renderChart() {
+      const container = d3.select("#chart-container");
+      container.selectAll("svg").remove();
+
+      const containerWidth = container.node().getBoundingClientRect().width || 800;
+      const margin = { top: 45, right: 125, bottom: 50, left: 75 };
+      const width = Math.max(300, containerWidth - margin.left - margin.right);
+      const height = 360 - margin.top - margin.bottom;
+
+      const svg = container.append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const x0 = d3.scaleBand()
+        .domain(penguinData.map(d => d.species))
+        .rangeRound([0, width])
+        .paddingInner(0.3);
+
+      const metrics = ['meanMass', 'meanFlipper'];
+      const x1 = d3.scaleBand()
+        .domain(metrics)
+        .rangeRound([0, x0.bandwidth()])
+        .padding(0.12);
+
+      const yMass = d3.scaleLinear()
+        .domain([0, 6000])
+        .nice()
+        .rangeRound([height, 0]);
+
+      const yFlipper = d3.scaleLinear()
+        .domain([0, 250])
+        .nice()
+        .rangeRound([height, 0]);
+
+      svg.append("g")
+        .attr("class", "grid-line")
+        .call(d3.axisLeft(yMass).ticks(6).tickSize(-width).tickFormat(""));
+
+      const yAxisLeft = svg.append("g")
+        .attr("class", "axis")
+        .call(d3.axisLeft(yMass).ticks(6).tickFormat(d => `${d}g`));
+
+      yAxisLeft.append("text")
+        .attr("x", -margin.left + 10)
+        .attr("y", -20)
+        .attr("fill", "#f59e0b")
+        .attr("text-anchor", "start")
+        .attr("font-weight", "700")
+        .text("Mean Body Mass (g)");
+
+      const yAxisRight = svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(${width}, 0)`)
+        .call(d3.axisRight(yFlipper).ticks(6).tickFormat(d => `${d}mm`));
+
+      yAxisRight.append("text")
+        .attr("x", 12)
+        .attr("y", -20)
+        .attr("fill", "#3b82f6")
+        .attr("text-anchor", "start")
+        .attr("font-weight", "700")
+        .text("Flipper Length (mm)");
+
+      const xAxis = svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x0));
+
+      xAxis.selectAll("text")
+        .attr("font-size", "13px")
+        .attr("font-weight", "600")
+        .attr("dy", "1em")
+        .attr("fill", "#e2e8f0");
+
+      const tooltip = d3.select("#tooltip");
+
+      const speciesGroup = svg.selectAll(".species-group")
+        .data(penguinData)
+        .enter()
+        .append("g")
+        .attr("class", "species-group")
+        .attr("transform", d => `translate(${x0(d.species)},0)`);
+
+      metrics.forEach(metric => {
+        const isMass = metric === 'meanMass';
+
+        speciesGroup.append("rect")
+          .attr("x", x1(metric))
+          .attr("width", x1.bandwidth())
+          .attr("y", height)
+          .attr("height", 0)
+          .attr("rx", 6)
+          .attr("ry", 6)
+          .attr("fill", d => {
+            if (isMass) {
+              return d.species === heaviestSpecies.species ? '#f59e0b' : '#334155';
+            } else {
+              return (d.species === heaviestSpecies.species && matchesCondition) ? '#3b82f6' : '#1e293b';
+            }
+          })
+          .attr("stroke", d => {
+            if (isMass) {
+              return d.species === heaviestSpecies.species ? '#fbbf24' : '#475569';
+            } else {
+              return (d.species === heaviestSpecies.species && matchesCondition) ? '#60a5fa' : '#334155';
+            }
+          })
+          .attr("stroke-width", 1.5)
+          .attr("class", d => {
+            if (isMass && d.species === heaviestSpecies.species) return "bar-glow-mass cursor-pointer";
+            if (!isMass && d.species === heaviestSpecies.species && matchesCondition) return "bar-glow-flipper cursor-pointer";
+            return "cursor-pointer transition-opacity duration-200 hover:opacity-80";
+          })
+          .on("mouseover", (event, d) => {
+            const val = isMass ? `${d.meanMass.toFixed(1)} g` : `${d.meanFlipper.toFixed(1)} mm`;
+            const title = isMass ? 'Mean Body Mass' : 'Mean Flipper Length';
+            const colorClass = isMass ? 'text-amber-400' : 'text-blue-400';
+
+            tooltip.style("opacity", 1)
+              .html(`
+                <div class="font-bold text-slate-100 border-b border-slate-700/80 pb-1 mb-1">${d.species} Penguin</div>
+                <div class="text-slate-300 text-[11px]">${title}: <span class="font-bold ${colorClass}">${val}</span></div>
+                <div class="text-[10px] text-slate-400">Sample Count: ${d.count}</div>
+              `);
+          })
+          .on("mousemove", (event) => {
+            const [x, y] = d3.pointer(event, container.node());
+            tooltip.style("transform", `translate(${x + 15}px, ${y - 20}px)`);
+          })
+          .on("mouseleave", () => {
+            tooltip.style("opacity", 0);
+          })
+          .transition()
+          .duration(1000)
+          .delay((d, i) => i * 150 + (isMass ? 0 : 100))
+          .ease(d3.easeCubicOut)
+          .attr("y", d => isMass ? yMass(d.meanMass) : yFlipper(d.meanFlipper))
+          .attr("height", d => isMass ? height - yMass(d.meanMass) : height - yFlipper(d.meanFlipper));
+
+        speciesGroup.append("text")
+          .attr("x", x1(metric) + x1.bandwidth() / 2)
+          .attr("y", height)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "11px")
+          .attr("font-weight", "700")
+          .attr("fill", d => {
+            if (isMass) return d.species === heaviestSpecies.species ? '#f59e0b' : '#94a3b8';
+            return (d.species === heaviestSpecies.species && matchesCondition) ? '#60a5fa' : '#64748b';
+          })
+          .attr("opacity", 0)
+          .text(d => isMass ? `${Math.round(d.meanMass)}g` : `${d.meanFlipper.toFixed(0)}mm`)
+          .transition()
+          .duration(1000)
+          .delay((d, i) => i * 150 + (isMass ? 0 : 100) + 300)
+          .attr("y", d => (isMass ? yMass(d.meanMass) : yFlipper(d.meanFlipper)) - 8)
+          .attr("opacity", 1);
+      });
+    }
+
+    // Render Bar Chart for Task 2 (Island Population Distribution)
+    // function renderIslandChart() {
+    //   const container = d3.select("#island-chart-container");
+    //   container.selectAll("svg").remove();
+
+    //   const containerWidth = container.node().getBoundingClientRect().width || 800;
+    //   const margin = { top: 35, right: 30, bottom: 50, left: 65 };
+    //   const width = Math.max(300, containerWidth - margin.left - margin.right);
+    //   const height = 320 - margin.top - margin.bottom;
+
+    //   const svg = container.append("svg")
+    //     .attr("width", width + margin.left + margin.right)
+    //     .attr("height", height + margin.top + margin.bottom)
+    //     .append("g")
+    //     .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    //   // X Scale (Islands)
+    //   const x = d3.scaleBand()
+    //     .domain(islandData.map(d => d.island))
+    //     .range([0, width])
+    //     .padding(0.4);
+
+    //   // Y Scale (Count of penguins)
+    //   const y = d3.scaleLinear()
+    //     .domain([0, 200])
+    //     .nice()
+    //     .range([height, 0]);
+
+    //   // Gridlines
+    //   svg.append("g")
+    //     .attr("class", "grid-line")
+    //     .call(d3.axisLeft(y).ticks(5).tickSize(-width).tickFormat(""));
+
+    //   // Y-Axis
+    //   const yAxis = svg.append("g")
+    //     .attr("class", "axis")
+    //     .call(d3.axisLeft(y).ticks(5));
+
+    //   yAxis.append("text")
+    //     .attr("x", -margin.left + 10)
+    //     .attr("y", -15)
+    //     .attr("fill", "#10b981")
+    //     .attr("text-anchor", "start")
+    //     .attr("font-weight", "700")
+    //     .text("Number of Penguins");
+
+    //   // X-Axis
+    //   const xAxis = svg.append("g")
+    //     .attr("class", "axis")
+    //     .attr("transform", `translate(0,${height})`)
+    //     .call(d3.axisBottom(x));
+
+    //   xAxis.selectAll("text")
+    //     .attr("font-size", "13px")
+    //     .attr("font-weight", "600")
+    //     .attr("dy", "1.2em")
+    //     .attr("fill", "#e2e8f0");
+
+    //   const tooltip = d3.select("#island-tooltip");
+
+    //   // Draw Island Bars
+    //   svg.selectAll(".island-bar")
+    //     .data(islandData)
+    //     .enter()
+    //     .append("rect")
+    //     .attr("class", d => d.island === maxIsland.island ? "cursor-pointer" : "cursor-pointer transition-opacity duration-200 hover:opacity-80")
+    //     .attr("x", d => x(d.island))
+    //     .attr("width", x.bandwidth())
+    //     .attr("y", height)
+    //     .attr("height", 0)
+    //     .attr("rx", 8)
+    //     .attr("ry", 8)
+    //     .attr("fill", d => d.island === maxIsland.island ? '#10b981' : '#334155')
+    //     .attr("stroke", d => d.island === maxIsland.island ? '#34d399' : '#475569')
+    //     .attr("stroke-width", 1.5)
+    //     .style("filter", d => d.island === maxIsland.island ? "drop-shadow(0px 0px 10px rgba(16, 185, 129, 0.5))" : "none")
+    //     .on("mouseover", (event, d) => {
+    //       tooltip.style("opacity", 1)
+    //         .html(`
+    //           <div class="font-bold text-slate-100 border-b border-slate-700/80 pb-1 mb-1">${d.island} Island</div>
+    //           <div class="text-slate-300 text-[11px]">Penguin Population: <span class="font-bold text-emerald-400">${d.count}</span></div>
+    //           <div class="text-[10px] text-slate-400">Share of Total: ${d.percentage}</div>
+    //         `);
+    //     })
+    //     .on("mousemove", (event) => {
+    //       const [xPos, yPos] = d3.pointer(event, container.node());
+    //       tooltip.style("transform", `translate(${xPos + 15}px, ${yPos - 20}px)`);
+    //     })
+    //     .on("mouseleave", () => {
+    //       tooltip.style("opacity", 0);
+    //     })
+    //     .transition()
+    //     .duration(1000)
+    //     .delay((d, i) => i * 150)
+    //     .ease(d3.easeCubicOut)
+    //     .attr("y", d => y(d.count))
+    //     .attr("height", d => height - y(d.count));
+
+    //   // Value Labels on Top of Bars
+    //   svg.selectAll(".bar-label")
+    //     .data(islandData)
+    //     .enter()
+    //     .append("text")
+    //     .attr("x", d => x(d.island) + x.bandwidth() / 2)
+    //     .attr("y", height)
+    //     .attr("text-anchor", "middle")
+    //     .attr("font-size", "12px")
+    //     .attr("font-weight", "800")
+    //     .attr("fill", d => d.island === maxIsland.island ? '#34d399' : '#94a3b8')
+    //     .attr("opacity", 0)
+    //     .text(d => `${d.count} (${d.percentage})`)
+    //     .transition()
+    //     .duration(1000)
+    //     .delay((d, i) => i * 150 + 300)
+    //     .attr("y", d => y(d.count) - 8)
+    //     .attr("opacity", 1);
+    // }
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDataAndRender();
+    });
+
+    // Responsive Redraw on Resize
+    window.addEventListener('resize', () => {
+      if (penguinData.length > 0) {
+        renderChart();
+        renderIslandChart();
+      }
+    });
+  </script>
+</body>
+</html>
